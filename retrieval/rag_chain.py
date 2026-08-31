@@ -8,6 +8,7 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains import create_retrieval_chain
 
 from config.settings import (
+    DEFAULT_COLLECTION_NAME,
     DEFAULT_PROVIDER,
     DEFAULT_TOP_K,
     DEFAULT_VECTOR_DB_PATH,
@@ -40,6 +41,7 @@ def generate_answer(
     provider: str = DEFAULT_PROVIDER,
     model_name: Optional[str] = None,
     persist_directory: str = DEFAULT_VECTOR_DB_PATH,
+    collection_name: str = DEFAULT_COLLECTION_NAME,
     k: int = DEFAULT_TOP_K,
 ) -> str:
     """Generate an answer to a query using dense retrieval and selected LLM provider.
@@ -49,13 +51,16 @@ def generate_answer(
         provider: LLM provider name ('google', 'groq', 'ollama').
         model_name: Optional model identifier override.
         persist_directory: Path to Chroma database.
+        collection_name: ChromaDB collection name.
         k: Top-k document chunks to retrieve.
 
     Returns:
         Generated answer string.
     """
     logger.info("Retrieving relevant context from Chroma database...")
-    db = load_vector_store(persist_directory=persist_directory)
+    db = load_vector_store(
+        persist_directory=persist_directory, collection_name=collection_name
+    )
     retriever = get_dense_retriever(db, k=k)
 
     logger.info("Initializing LLM provider '%s'...", provider)

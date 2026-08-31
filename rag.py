@@ -19,6 +19,7 @@ from chunking.text_splitter import split_documents
 from config.settings import (
     DEFAULT_CHUNK_OVERLAP,
     DEFAULT_CHUNK_SIZE,
+    DEFAULT_COLLECTION_NAME,
     DEFAULT_PROVIDER,
     DEFAULT_TOP_K,
     DEFAULT_VECTOR_DB_PATH,
@@ -59,7 +60,11 @@ def ingest(args: argparse.Namespace) -> None:
 
     print("\nGenerating embeddings...")
     print("Persisting Chroma database...")
-    create_vector_store(chunked_docs, persist_directory=args.vector_db_path)
+    create_vector_store(
+        chunked_docs,
+        persist_directory=args.vector_db_path,
+        collection_name=args.collection_name,
+    )
 
     print("\nDone. Ingestion completed successfully! ✨\n")
 
@@ -71,7 +76,10 @@ def query(args: argparse.Namespace) -> None:
         args: Parsed command line arguments.
     """
     print("\n📚 Custom RAG Framework — type 'exit' to quit.\n")
-    print(f"Provider: {args.provider} | Vector DB: {args.vector_db_path}\n")
+    print(
+        f"Provider: {args.provider} | Model: {args.model or 'default'} | "
+        f"Vector DB: {args.vector_db_path} | Collection: {args.collection_name}\n"
+    )
 
     while True:
         try:
@@ -93,6 +101,7 @@ def query(args: argparse.Namespace) -> None:
                 provider=args.provider,
                 model_name=args.model,
                 persist_directory=args.vector_db_path,
+                collection_name=args.collection_name,
                 k=args.k,
             )
             print(f"\nAnswer 🤖:\n{answer}\n")
@@ -140,6 +149,11 @@ def build_parser() -> argparse.ArgumentParser:
         default=DEFAULT_VECTOR_DB_PATH,
         help=f"Path to persist ChromaDB (default: {DEFAULT_VECTOR_DB_PATH})",
     )
+    ingest_parser.add_argument(
+        "--collection-name",
+        default=DEFAULT_COLLECTION_NAME,
+        help=f"ChromaDB collection name (default: {DEFAULT_COLLECTION_NAME})",
+    )
 
     # Query subcommand
     query_parser = subparsers.add_parser(
@@ -162,6 +176,11 @@ def build_parser() -> argparse.ArgumentParser:
         dest="vector_db_path",
         default=DEFAULT_VECTOR_DB_PATH,
         help=f"Path to ChromaDB vector store (default: {DEFAULT_VECTOR_DB_PATH})",
+    )
+    query_parser.add_argument(
+        "--collection-name",
+        default=DEFAULT_COLLECTION_NAME,
+        help=f"ChromaDB collection name (default: {DEFAULT_COLLECTION_NAME})",
     )
     query_parser.add_argument(
         "--k",

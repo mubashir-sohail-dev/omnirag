@@ -10,17 +10,18 @@ from langchain_core.documents import Document
 from pdf2image import convert_from_path
 from pypdf import PdfReader
 
-from config.settings import OCR_MIN_TEXT_LENGTH
+from config.settings import OCR_LANGUAGE, OCR_MIN_TEXT_LENGTH
 from utils.helpers import discover_supported_files, validate_path_exists
 
 logger = logging.getLogger(__name__)
 
 
-def _run_ocr_on_page(page_image) -> str:
+def _run_ocr_on_page(page_image, lang: str = OCR_LANGUAGE) -> str:
     """Run PyOCR text extraction on a single page image object.
 
     Args:
         page_image: PIL Image object of the PDF page.
+        lang: OCR language code (default: from settings).
 
     Returns:
         Extracted text string.
@@ -35,7 +36,7 @@ def _run_ocr_on_page(page_image) -> str:
         )
     tool = tools[0]
     return tool.image_to_string(
-        page_image, lang="eng", builder=pyocr.builders.TextBuilder()
+        page_image, lang=lang, builder=pyocr.builders.TextBuilder()
     )
 
 

@@ -6,7 +6,7 @@ from langchain_community.llms import Ollama
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_groq import ChatGroq
 
-from config.settings import DEFAULT_MODEL_MAP, DEFAULT_PROVIDER
+from config.settings import DEFAULT_MODEL_MAP, DEFAULT_PROVIDER, OLLAMA_BASE_URL
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,11 @@ def get_llm(
     elif provider_clean == "groq":
         return ChatGroq(model=selected_model, temperature=temperature)
     elif provider_clean == "ollama":
-        return Ollama(model=selected_model, temperature=temperature)
+        return Ollama(
+            model=selected_model,
+            temperature=temperature,
+            base_url=OLLAMA_BASE_URL,
+        )
     else:
         raise ValueError(
             f"Unsupported LLM provider '{provider}'. Supported providers: "
