@@ -1,4 +1,4 @@
-"""Custom RAG — Standalone Open-Source Dense Retrieval Framework CLI.
+"""OmniRAG — Universal Dense Retrieval & Document Intelligence Framework CLI.
 
 Provides ``ingest`` and ``query`` commands for building vector stores
 from documents (PDFs, TXT files, or directories) and interactively querying
@@ -75,7 +75,7 @@ def query(args: argparse.Namespace) -> None:
     Args:
         args: Parsed command line arguments.
     """
-    print("\n📚 Custom RAG Framework — type 'exit' to quit.\n")
+    print("\n⚡ OmniRAG Document Intelligence — type 'exit' to quit.\n")
     print(
         f"Provider: {args.provider} | Model: {args.model or 'default'} | "
         f"Vector DB: {args.vector_db_path} | Collection: {args.collection_name}\n"
@@ -116,8 +116,8 @@ def build_parser() -> argparse.ArgumentParser:
         Configured :class:`argparse.ArgumentParser` instance.
     """
     parser = argparse.ArgumentParser(
-        prog="custom_rag",
-        description="Custom Open-Source Dense Retrieval RAG Framework.",
+        prog="omnirag",
+        description="OmniRAG — Universal Dense Retrieval & Document Intelligence Framework.",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available sub-commands")
 

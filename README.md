@@ -1,7 +1,9 @@
-# Custom RAG — Open-Source Dense Retrieval Framework
+# ⚡ OmniRAG — Universal Dense Retrieval & Document Intelligence Framework
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![ChromaDB](https://img.shields.io/badge/Vector%20DB-ChromaDB-red.svg)](https://www.trychroma.com/)
+[![LangChain](https://img.shields.io/badge/Orchestration-LangChain%20v0.3-green.svg)](https://python.langchain.com/)
 
 A modular, production-ready Python framework for building **Dense Retrieval-Augmented Generation (RAG)** systems using **ChromaDB**, **HuggingFace Dense Embeddings**, and multi-provider LLM integrations (**Google Gemini**, **Groq**, and **Ollama**).
 
@@ -9,18 +11,19 @@ A modular, production-ready Python framework for building **Dense Retrieval-Augm
 
 ## 🌟 Overview
 
-**Custom RAG** turns any collection of PDF documents, scanned files, or text notes into an intelligent, queryable document knowledge base. It includes an automated OCR pipeline, page-aware text splitting, persistent vector indexing, and plug-and-play LLM answer generation with strict anti-hallucination prompts.
+**OmniRAG** transforms any collection of PDF documents, scanned files, or text notes into an intelligent, queryable document knowledge base. It includes an automated OCR fallback pipeline, page-aware recursive text splitting, persistent vector indexing, and plug-and-play LLM answer generation with strict anti-hallucination prompts.
 
 ---
 
 ## ✨ Features
 
-- **Generic Multi-Format Ingestion**: Ingest single PDF files, text documents, or entire directory trees (`.pdf`, `.txt`).
-- **Automated OCR Pipeline**: Built-in PyOCR / Tesseract support for scanning image-based PDFs seamlessly.
-- **Page-Aware Text Chunking**: Context-preserving recursive splitting with metadata tracking and configurable overlap.
-- **Dense Vector Search**: High-performance semantic similarity matching using ChromaDB and `sentence-transformers/all-MiniLM-L6-v2`.
-- **Multi-Provider LLM Integration**: Dynamically switch between **Google Gemini**, **Groq (Llama 3.1)**, and local **Ollama** models via simple CLI flags.
-- **Production Architecture**: 100% self-contained codebase with zero external project dependencies, comprehensive type hints, logging, and unit tests.
+- **📑 Generic Multi-Format Ingestion**: Ingest single PDF files, text documents, or entire directory trees (`.pdf`, `.txt`) recursively.
+- **👁️ Automated OCR Pipeline**: Built-in PyOCR / Tesseract support for scanning image-based PDFs seamlessly.
+- **🧩 Page-Aware Text Chunking**: Context-preserving recursive splitting with metadata tracking and configurable overlap.
+- **⚡ Dense Vector Search**: High-performance semantic similarity matching using ChromaDB and `sentence-transformers/all-MiniLM-L6-v2`.
+- **🔀 Multi-Provider LLM Integration**: Dynamically switch between **Google Gemini**, **Groq (Llama 3.1)**, and local offline **Ollama** models via simple CLI flags.
+- **🛡️ Strict Anti-Hallucination Guardrails**: Specialized system prompt instructions to guarantee document-grounded answers.
+- **🧪 Comprehensive Test Suite**: 100% unit-tested with Pytest.
 
 ---
 
@@ -29,13 +32,13 @@ A modular, production-ready Python framework for building **Dense Retrieval-Augm
 ```mermaid
 flowchart TD
     A[Input Documents: PDF / TXT / Directory] --> B[Ingestion Loader]
-    B --> C{File Type?}
-    C -->|PDF| D[PyOCR / Page Renderer]
-    C -->|TXT| E[Text Reader]
-    D --> F[LangChain Documents]
+    B --> C{Dense Text Found?}
+    C -->|Yes| D[Native Page Extraction]
+    C -->|No / Scanned PDF| E[PyOCR / Tesseract Fallback]
+    D --> F[LangChain Documents + Metadata]
     E --> F
-    F --> G[Recursive Text Splitter]
-    G --> H[HuggingFace Dense Embeddings]
+    F --> G[Recursive Character Text Splitter]
+    G --> H[HuggingFace Dense Embeddings: all-MiniLM-L6-v2]
     H --> I[(ChromaDB Vector Store)]
     
     J[User Query] --> K[Dense Similarity Retriever]
@@ -50,7 +53,7 @@ flowchart TD
 ## 📁 Repository Structure
 
 ```text
-custom_rag/
+omnirag/
 ├── config/
 │   ├── __init__.py
 │   └── settings.py          # Centralized configuration & hyperparameter defaults
@@ -99,11 +102,18 @@ custom_rag/
 Clone the repository and install dependencies:
 
 ```bash
-cd custom_rag
+git clone https://github.com/mubashir-sohail-dev/omnirag.git
+cd omnirag
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-*Note: Ensure Tesseract OCR and Poppler (for `pdf2image`) are installed on your system path if processing scanned PDFs.*
+> **Prerequisites for Scanned PDFs:**  
+> Ensure **Tesseract OCR** and **Poppler** are installed on your system if you plan to run OCR on image-based PDFs:
+> - **Linux**: `sudo apt-get install tesseract-ocr poppler-utils`
+> - **macOS**: `brew install tesseract poppler`
+> - **Windows**: Install [Tesseract for Windows](https://github.com/UB-Mannheim/tesseract/wiki) and [Poppler for Windows](https://github.com/oschwartz10612/poppler-windows/releases) and add them to your `PATH`.
 
 ### 2. Environment Setup
 
@@ -115,8 +125,8 @@ cp .env.example .env
 
 Example `.env` contents:
 ```env
-GOOGLE_API_KEY=your_google_gemini_api_key
-GROQ_API_KEY=your_groq_api_key
+GOOGLE_API_KEY=your_google_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 ```
 
 ---
@@ -142,9 +152,9 @@ python rag.py ingest path/to/notes.txt
 python rag.py ingest ./knowledge_base
 ```
 
-#### Custom Chunking Parameters
+#### Custom Chunking & Database Parameters
 ```bash
-python rag.py ingest ./knowledge_base --chunk-size 800 --chunk-overlap 150 --vector-db-path ./custom_db
+python rag.py ingest ./knowledge_base --chunk-size 800 --chunk-overlap 150 --vector-db-path ./custom_db --collection-name my_docs
 ```
 
 ---
@@ -179,14 +189,15 @@ python rag.py query --provider google --k 7 --vector-db-path ./custom_db
 
 All defaults are defined in `config/settings.py` and can be overridden via CLI flags or environment variables:
 
-| Setting | Default Value | Description |
-|---|---|---|
-| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | HuggingFace dense model |
-| `DEFAULT_CHUNK_SIZE` | `1000` | Maximum character length per chunk |
-| `DEFAULT_CHUNK_OVERLAP` | `200` | Overlap between adjacent chunks |
-| `DEFAULT_VECTOR_DB_PATH` | `./vector_store` | Local ChromaDB database path |
-| `DEFAULT_PROVIDER` | `google` | Default LLM provider (`google`, `groq`, `ollama`) |
-| `DEFAULT_TOP_K` | `5` | Chunks retrieved per query |
+| Setting | Default Value | Environment Variable | Description |
+|---|---|---|---|
+| `EMBEDDING_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | `EMBEDDING_MODEL` | HuggingFace dense embedding model |
+| `DEFAULT_CHUNK_SIZE` | `1000` | `DEFAULT_CHUNK_SIZE` | Maximum character length per chunk |
+| `DEFAULT_CHUNK_OVERLAP` | `200` | `DEFAULT_CHUNK_OVERLAP` | Overlap between adjacent chunks |
+| `DEFAULT_VECTOR_DB_PATH` | `./vector_store` | `VECTOR_DB_PATH` | Local ChromaDB database path |
+| `DEFAULT_COLLECTION_NAME` | `omnirag_collection` | `COLLECTION_NAME` | ChromaDB collection name |
+| `DEFAULT_PROVIDER` | `google` | `DEFAULT_LLM_PROVIDER` | Default LLM provider (`google`, `groq`, `ollama`) |
+| `DEFAULT_TOP_K` | `5` | `TOP_K` | Chunks retrieved per query |
 
 ---
 
@@ -200,23 +211,8 @@ python -m pytest tests/ -v
 
 ---
 
-## 🛠️ Troubleshooting
-
-- **OCR Tool Not Found Error**: Install Tesseract OCR (`apt-get install tesseract-ocr` on Linux, `brew install tesseract` on macOS, or the Tesseract installer on Windows) and verify `tesseract --version` works in your terminal.
-- **pdf2image / Poppler Error**: Install Poppler binaries (`apt-get install poppler-utils` on Linux, `brew install poppler` on macOS).
-- **ChromaDB SQLite Warning**: Upgrade `chromadb` or ensure SQLite 3.35+ is available in your Python environment.
-
----
-
-## 🗺️ Roadmap
-
-- [ ] Support for Markdown (`.md`), Docx (`.docx`), and HTML ingestion loaders.
-- [ ] Hybrid BM25 + Dense ensemble retrieval support.
-- [ ] FastApi REST endpoint for serving queries as a web API.
-- [ ] Docker containerization.
-
----
-
 ## 📄 License
 
 Distributed under the **MIT License**. See `LICENSE` for details.
+Author: [Mubashir Sohail](https://github.com/mubashir-sohail-dev)
+

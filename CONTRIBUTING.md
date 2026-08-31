@@ -1,12 +1,12 @@
-# Contributing to Custom RAG
+# Contributing to OmniRAG
 
-Thank you for your interest in contributing to **Custom RAG**!
+Thank you for your interest in contributing to **OmniRAG**!
 
 ## Development Setup
 
-1. Clone the repository and navigate to `custom_rag/`:
+1. Clone the repository and navigate to `omnirag/`:
    ```bash
-   cd custom_rag
+   cd omnirag
    ```
 2. Create and activate a virtual environment:
    ```bash

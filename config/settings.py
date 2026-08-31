@@ -28,7 +28,7 @@ CHUNK_SEPARATORS: list[str] = ["\n[PAGE", "\n\n", "\n", ". ", " ", ""]
 DEFAULT_VECTOR_DB_PATH: str = os.getenv("VECTOR_DB_PATH", "./vector_store")
 """Default local path for persisting Chroma database."""
 
-DEFAULT_COLLECTION_NAME: str = os.getenv("COLLECTION_NAME", "custom_rag_collection")
+DEFAULT_COLLECTION_NAME: str = os.getenv("COLLECTION_NAME", "omnirag_collection")
 """Default collection name in ChromaDB."""
 
 # Retrieval Configuration
